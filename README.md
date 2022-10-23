@@ -1,6 +1,6 @@
 # MCoMPytorch
 
-This repository contains the code for [(arxiv link)](https://arxiv.org/abs/2108.12296) 
+This repository contains the code for [(springer link)](https://link.springer.com/chapter/10.1007/978-3-031-10684-2_4) 
 
 ```
 @inproceedings{li2022mcom,
