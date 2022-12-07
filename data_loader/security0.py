@@ -4,13 +4,14 @@ from keras.datasets import mnist
 from torch.utils.data import Dataset
 import pandas as pd
 import random
+from sklearn.preprocessing import LabelEncoder
+from tensorflow.keras.utils import to_categorical
+from sklearn.model_selection import train_test_split
 
 METHODS = ['', 'supervised', 'semisupervised', 'pseudolabeling']
 
 class Security(Dataset):
     """ Implements keras MNIST torch.utils.data.dataset
-
-
         Args:
             train (bool): flag to determine if train set or test set should be loaded
             labeled_ratio (float): fraction of train set to use as labeled
@@ -19,42 +20,74 @@ class Security(Dataset):
                 'semisupervised': getitem will return x_labeled, x_unlabeled, y_label
                 'pseudolabeling': getitem will return x_labeled, x_unlabeled, y_label, y_pseudolabel
             random_seed (int): change random_seed to obtain different splits otherwise the fixed random_seed will be used
-
     """
     def __init__(self,
                  train: bool,
                  labeled_ratio: float=0.0,
                  method: str='supervised',
                  random_seed: int=None,
-                 data_dir: str='./dataset/security/combined.csv'):
+                 data_dir: str='/home/xiaodi/security/ContrastiveMixup/dataset/security/GIDS_Merged.csv'):
         super().__init__()
         print('Dataloader __getitem__ mode: {}'.format(method))
         assert method.lower() in METHODS , 'Method argument is invalid {}, must be in'.format(METHODS)
         data_csv = pd.read_csv(data_dir)
 
-        data_train = data_csv.sample(frac=0.8, random_state=25)
-        data_test = data_csv.drop(data_train.index)
+        data_csv.rename(columns={"CAN ID": "CAN_ID"}, inplace=True)
+        # Convert the Dataset Hex Value to Decimal
+        data_csv[["CAN_ID", "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7"]] = data_csv[
+            ["CAN_ID", "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7"]
+        ].apply(lambda x: x.astype(str).map(lambda x: int(x, base=16)))
+        # #############################################################################
+        # Delete the values in Label Column consists of Zero
+        data_csv.drop(data_csv.index[data_csv["Label"] == "0"], inplace=True)
+        data_csv.packer_type = pd.factorize(data_csv.packer_type)[0]
+        data_y = data_csv.to_numpy()[:, -1].astype(np.int)
+        idx_pos = [i for i, x in enumerate(data_y) if x == 1]
+        idx_neg = [i for i, x in enumerate(data_y) if x == 0]
+        data_list = data_csv.values.tolist()
+        data_pos = np.array(random.sample(list(np.array(data_list)[idx_pos]), int(0.04 * len(idx_pos))))
+        data_neg = np.array(data_list)[idx_neg]
+        print(len(data_pos))
+        print(len(data_neg))
+        data_array = np.vstack((data_pos, data_neg))
+        # data_array = np.array(data_list)
 
-        data_train_x = data_train.to_numpy()[:, 2:].astype(np.float32)
-        data_train_y = data_train.to_numpy()[:, 1].astype(np.int)
+        data_x = data_array[:, :-1].astype(np.float32)
+        data_y = data_array[:, -1].astype(np.int)
 
-        data_test_x = data_test.to_numpy()[:, 2:].astype(np.float32)
-        data_test_y = data_test.to_numpy()[:, 1].astype(np.int)
+        data_train_x, data_test_x, data_train_y, data_test_y = train_test_split(data_x, data_y, test_size=0.20,
+                                                                                random_state=42)
 
-        # data augmentation
-        idx = [i for i, x in enumerate(data_train_y) if x == 1]
-        idx = random.sample(idx, 100)
-        aug_orig = data_train_x[idx]
-        aug_new_x = []
-        aug_new_y = []
-        lmd = np.random.uniform(low=0.1)
-        for i in range(0, len(aug_orig) - 1):
-            for j in range(i + 1, len(aug_orig)):
-                aug_new_x.append(lmd * aug_orig[i] + (1 - lmd) * aug_orig[j])
-                aug_new_y.append(1)
-        data_train_x = np.concatenate((data_train_x, aug_new_x), axis=0)
-        data_train_y = np.append(data_train_y, aug_new_y)
+        # data_train = data_csv.sample(frac=0.8, random_state=25)
+        # data_test = data_csv.drop(data_train.index)
+        #
+        # data_train_x = data_train.to_numpy()[:, :-1].astype(np.float32)
+        # data_train_y = data_train.to_numpy()[:, -1].astype(np.int)
+        #
+        # data_test_x = data_test.to_numpy()[:, :-1].astype(np.float32)
+        # data_test_y = data_test.to_numpy()[:, -1].astype(np.int)
         print(len(data_train_y))
+        print(len(data_test_y))
+
+        # # data augmentation triplet
+        # idx = [i for i, x in enumerate(data_train_y) if x == 1]
+        # idx_test = [i for i, x in enumerate(data_test_y) if x == 1]
+        # print(len(idx))
+        # print(len(idx_test))
+        # # idx = random.sample(idx, 60)
+        # aug_orig = data_train_x[idx]
+        # aug_new_x = []
+        # aug_new_y = []
+        # lmd1 = np.random.uniform(low=0.1, high=0.5)
+        # lmd2 = np.random.uniform(low=0.1, high=0.5)
+        # for i in range(0, len(aug_orig) - 2):
+        #     for j in range(i + 1, len(aug_orig) - 1):
+        #         for k in range(j + 1, len(aug_orig)):
+        #             aug_new_x.append(lmd1 * aug_orig[i] + lmd2 * aug_orig[j] + (1 - lmd1 - lmd2) * aug_orig[k])
+        #             aug_new_y.append(1)
+        # data_train_x = np.concatenate((data_train_x, aug_new_x), axis=0)
+        # data_train_y = np.append(data_train_y, aug_new_y)
+        # print(len(data_train_y))
 
         # random data set
         rand_idx = random.sample(range(0, len(data_train_y)), len(data_train_y))
