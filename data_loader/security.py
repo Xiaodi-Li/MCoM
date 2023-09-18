@@ -40,7 +40,6 @@ class Security(Dataset):
 
         # data augmentation
         idx = [i for i, x in enumerate(data_train_y) if x == 1]
-        idx = random.sample(idx, 100)
         aug_orig = data_train_x[idx]
         aug_new_x = []
         aug_new_y = []
@@ -51,7 +50,6 @@ class Security(Dataset):
                 aug_new_y.append(1)
         data_train_x = np.concatenate((data_train_x, aug_new_x), axis=0)
         data_train_y = np.append(data_train_y, aug_new_y)
-        print(len(data_train_y))
 
         # random data set
         rand_idx = random.sample(range(0, len(data_train_y)), len(data_train_y))
