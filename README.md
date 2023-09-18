@@ -31,9 +31,9 @@ pip install -r requirements.txt
 
 To run experiments they are launched from the `train.py` file.  For example, to run MCoM on MNIST use the following command
 
-`python train.py -c ./configs/mnist/mcom.json --pretrain`
+`python train.py -c ./configs/security/mcom_security.json --pretrain`
 
-The trainer, data loader, model, optimizer, settings are all specified in the `./configs/mnist/mcom.json` file. 
+The trainer, data loader, model, optimizer, settings are all specified in the `./configs/security/mcom_security.json` file. 
 The `--pretrain` options specifies whether to run the pretraining phase (i.e. training the encoder).
 
 
