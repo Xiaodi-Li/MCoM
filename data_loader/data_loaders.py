@@ -1,7 +1,7 @@
 from torchvision import datasets, transforms
 from base import BaseDataLoader
 from data_loader.keras_mnist import KerasMNIST
-from data_loader.security_orig import Security
+from data_loader.security import Security
 
 import copy
 import torch
