@@ -26,7 +26,7 @@ class Security(Dataset):
                  labeled_ratio: float=0.0,
                  method: str='supervised',
                  random_seed: int=None,
-                 data_dir: str='./dataset/security/normalized_0_1_combined_filtered.csv'):
+                 data_dir: str='./dataset/security/combined.csv'):
         super().__init__()
         print('Dataloader __getitem__ mode: {}'.format(method))
         assert method.lower() in METHODS , 'Method argument is invalid {}, must be in'.format(METHODS)
