@@ -54,8 +54,8 @@ class Security(Dataset):
         aug_new_y = []
         lmd1 = np.random.uniform(low=0.1, high=0.5)
         lmd2 = np.random.uniform(low=0.1, high=0.5)
-        for i in range(0, len(aug_orig) - 2, 4):
-            for j in range(i + 1, len(aug_orig) - 1, 10):
+        for i in range(0, len(aug_orig) - 2):
+            for j in range(i + 1, len(aug_orig) - 1):
                 for k in range(j + 1, len(aug_orig)):
                     aug_new_x.append(lmd1 * aug_orig[i] + lmd2 * aug_orig[j] + (1 - lmd1 - lmd2) * aug_orig[k])
                     aug_new_y.append(1)
