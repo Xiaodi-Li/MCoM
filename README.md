@@ -18,13 +18,11 @@ This repository contains the code for [(Springer Link)](https://link.springer.co
 
 The project was run on a conda virtual environment on Ubuntu 18.04.5 LTS.
 
-Checkout the `requirements.txt` file, if you have conda pre-installed `cd` into the directory where you have downloaded the source code and run the following
+If you have conda pre-installed `cd` into the directory where you have downloaded the source code and run the following
 
 ```
 conda create -n mcom python==3.7
 conda activate mcom
-
-pip install -r requirements.txt
 ```
 
 ## Running Experiments
